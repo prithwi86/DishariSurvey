@@ -11,6 +11,21 @@
       <div class="kick">Tally · <%= fmt.plural(tally.total, 'answer') %></div>
       <%- include('../partials/optbars', { tally: tally }) %>
     </div>
+    <div class="kick" style="margin-top:var(--space-2)">Full discussion</div>
+    <div>
+      <% if (!comments.length) { %><p class="text-muted muted-s">No comments yet.</p><% } %>
+      <% comments.forEach(function (c) { %>
+      <div class="cmt<%= c.flagged ? ' is-flagged' : '' %>" id="c<%= c.id %>">
+        <div class="cmt-h"><span class="avatar"><%= fmt.initial(c.display_name) %></span><b><%= c.display_name %></b><span class="text-muted" style="font-size:11px" title="<%= fmt.formatDateTime(c.created_at) %>"><%= fmt.relativeTime(c.created_at) %></span>
+          <span style="margin-left:auto;display:inline-flex;align-items:center;gap:6px">
+            <% if (c.flagged) { %><span class="tag tag-outline">Flagged</span><% } %>
+            <%- include('../partials/flag-form', { c: c }) %>
+          </span>
+        </div>
+        <p class="cmt-body"><%= c.body %></p>
+      </div>
+      <% }) %>
+    </div>
     <% } else if (yn) { %>
     <div class="qcard" style="gap:10px">
       <div class="kick">Tally · <%= fmt.plural(tally.total, 'vote') %></div>

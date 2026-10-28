@@ -114,6 +114,17 @@ function setStatus(db, surveyId, status) {
   db.prepare('UPDATE surveys SET status = ? WHERE id = ?').run(status, surveyId);
 }
 
+/** Deletes a survey and its questions. Refuses if any codes have been generated for it. */
+function deleteSurvey(db, surveyId) {
+  db.transaction(() => {
+    const { issued } = db.prepare('SELECT COUNT(*) AS issued FROM codes WHERE survey_id = ?').get(surveyId);
+    if (issued > 0) throw new Error('Codes have already been generated for this survey.');
+    db.prepare('DELETE FROM questions WHERE survey_id = ?').run(surveyId);
+    const deleted = db.prepare('DELETE FROM surveys WHERE id = ?').run(surveyId);
+    if (deleted.changes !== 1) throw new Error(`Survey ${surveyId} not found`);
+  })();
+}
+
 function codeStats(db, surveyId) {
   const row = db
     .prepare('SELECT COUNT(*) AS issued, COUNT(used_at) AS used FROM codes WHERE survey_id = ?')
@@ -165,7 +176,6 @@ function lookupCode(db, code) {
  * Normalises the participant payload against the survey's questions.
  * payload.answers = { [questionId]: { vote: 'yes'|'no', choice: <option index>, comments: [string] } }
  * Yes/No and multiple-choice answers are required; comments and written answers are optional.
- * Multiple-choice questions take no comments.
  */
 function normaliseAnswers(questions, payload) {
   const answers = (payload && typeof payload.answers === 'object' && payload.answers) || {};
@@ -197,7 +207,7 @@ function normaliseAnswers(questions, payload) {
         const body = clean(c);
         if (body) comments.push({ body, field });
       });
-    } else if (q.type !== 'choice') {
+    } else {
       const raw = Array.isArray(a.comments) ? a.comments : [];
       if (raw.length > config.maxCommentsPerQuestion) throw new SubmitError('bad-request', { message: 'Too many comments' });
       for (const c of raw) {
@@ -365,6 +375,7 @@ module.exports = {
   getSurvey,
   getQuestions,
   setStatus,
+  deleteSurvey,
   codeStats,
   listSurveys,
   latestCodes,

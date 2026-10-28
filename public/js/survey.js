@@ -167,7 +167,7 @@
     sections.forEach(post);
     var answers = {};
     data.questions.forEach(function (q) {
-      if (q.type === 'choice') answers[q.id] = { choice: state.choices[q.id] };
+      if (q.type === 'choice') answers[q.id] = { choice: state.choices[q.id], comments: state.posted[q.id] || [] };
       else if (q.type === 'text' && q.boxes) answers[q.id] = { fields: (state.fields[q.id] || []).slice(0, q.boxes).map(function (t) { return (t || '').trim().slice(0, MAX); }) };
       else if (q.type === 'text') answers[q.id] = { comments: (state.typed[q.id] || '').trim() ? [state.typed[q.id].trim().slice(0, MAX)] : [] };
       else answers[q.id] = { vote: state.votes[q.id] || null, comments: state.posted[q.id] || [] };

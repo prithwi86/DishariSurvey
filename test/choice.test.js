@@ -21,12 +21,12 @@ test('multiple-choice answers are required and must be a valid option', () => {
   assert.strictEqual(db.prepare('SELECT COUNT(*) n FROM responses').get().n, 0);
 });
 
-test('choices are stored, tallied per option, and take no comments', () => {
+test('choices are stored, tallied per option, and may carry optional comments', () => {
   const { db, surveyId, qids } = setupDb();
   const codes = generateCodes(db, surveyId, 4);
   [0, 1, 1, 3].forEach((choice, i) => {
     const p = validPayload(qids);
-    p.answers[qids[3]] = { choice, comments: ['should be ignored'] };
+    p.answers[qids[3]] = { choice, comments: ['Why I picked this'] };
     submitResponse(db, codes[i], p);
   });
   const q = getResults(db, surveyId).questions[3];
@@ -34,7 +34,7 @@ test('choices are stored, tallied per option, and take no comments', () => {
   assert.deepStrictEqual(q.tally.options.map((o) => [o.label, o.count, o.pct]), [
     ['Excellent', 1, 25], ['Good', 2, 50], ['Poor', 0, 0], ['Did Not Purchase Food', 1, 25],
   ]);
-  assert.strictEqual(db.prepare('SELECT COUNT(*) n FROM comments WHERE question_id = ?').get(qids[3]).n, 0);
+  assert.strictEqual(db.prepare('SELECT COUNT(*) n FROM comments WHERE question_id = ?').get(qids[3]).n, 4);
   const exported = getResponsesForExport(db, surveyId);
   assert.strictEqual(exported[0].choices[qids[3]], 0);
 });
