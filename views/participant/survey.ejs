@@ -44,6 +44,16 @@
       <button type="button" class="btn choice" data-choice="<%= oi %>" role="radio" aria-checked="false"><span class="choice-dot" aria-hidden="true"></span><span><%= label %></span></button>
       <% }) %>
     </div>
+    <hr class="hr" style="margin:0">
+    <div style="display:flex;flex-direction:column">
+      <div class="field">
+        <label for="composer-<%= q.id %>">Comment (optional)</label>
+        <textarea class="input composer" id="composer-<%= q.id %>" maxlength="2000" style="min-height:72px" placeholder="Anything you'd like to add?"></textarea>
+      </div>
+      <button type="button" class="btn btn-secondary btn-block" style="justify-content:flex-start" data-action="post" disabled><%- icon('send', 'sm') %>Post comment</button>
+      <p class="text-muted" style="font-size:12px;margin:8px 0 0">Only Dishari admins can read this.</p>
+      <div class="posted" style="margin-top:var(--space-3)" hidden></div>
+    </div>
     <% } else if (yn) { %>
     <div class="barrow" style="gap:var(--space-2)" role="group" aria-label="Your answer">
       <button type="button" class="btn vote vote-yes" data-vote="yes" aria-pressed="false"><%- icon('thumbs-up') %>Yes</button>

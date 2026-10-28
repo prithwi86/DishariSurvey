@@ -165,6 +165,15 @@ module.exports = function adminRoutes({ db, sessionSecret, auth = {} }) {
     res.redirect(`/admin/surveys/${req.survey.id}`);
   });
 
+  router.post('/surveys/:id/delete', loadSurvey, (req, res, next) => {
+    try {
+      surveys.deleteSurvey(db, req.survey.id);
+      res.redirect('/admin');
+    } catch (err) {
+      next(err);
+    }
+  });
+
   router.get('/surveys/:id/q/:n', loadSurvey, (req, res) => {
     const question = surveys.getQuestionByPosition(db, req.survey.id, Number(req.params.n));
     if (!question) return res.redirect(`/admin/surveys/${req.survey.id}`);
@@ -229,7 +238,7 @@ module.exports = function adminRoutes({ db, sessionSecret, auth = {} }) {
     const header = ['response', 'display_name', 'submitted_at'];
     for (const q of questions) {
       if (q.type === 'yesno') header.push(`Q${q.position} vote: ${q.title}`, `Q${q.position} comments`);
-      else if (q.type === 'choice') header.push(`Q${q.position}: ${q.title}`);
+      else if (q.type === 'choice') header.push(`Q${q.position}: ${q.title}`, `Q${q.position} comments`);
       else if (q.fields.length) q.fields.forEach((f) => header.push(`Q${q.position} ${f}: ${q.title}`));
       else header.push(`Q${q.position} answer: ${q.title}`);
     }
@@ -242,7 +251,7 @@ module.exports = function adminRoutes({ db, sessionSecret, auth = {} }) {
           .join('\n---\n');
       for (const q of questions) {
         if (q.type === 'yesno') row.push(r.votes[q.id] || '', textFor(q));
-        else if (q.type === 'choice') row.push(r.choices[q.id] !== undefined ? q.options[r.choices[q.id]] : '');
+        else if (q.type === 'choice') row.push(r.choices[q.id] !== undefined ? q.options[r.choices[q.id]] : '', textFor(q));
         else if (q.fields.length) q.fields.forEach((f, field) => row.push(textFor(q, field)));
         else row.push(textFor(q));
       }

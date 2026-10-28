@@ -97,7 +97,7 @@ function buildReport({ survey, questions, stats, comments, excludeFlagged }) {
   const yesno = questions.filter((q) => q.type === 'yesno');
   const choice = questions.filter((q) => q.type === 'choice');
   const closed = questions.filter((q) => q.type !== 'text'); // summarised as charts
-  const withText = questions.filter((q) => q.type !== 'choice'); // can have comments / written answers
+  const withText = questions.filter((q) => q.type !== 'choice' || (comments[q.id] || []).length); // can have comments / written answers
 
   let fontNoteY = 0; // where the cover's font note goes, if characters had to be replaced
 
@@ -227,7 +227,7 @@ function buildReport({ survey, questions, stats, comments, excludeFlagged }) {
           doc.y += 6;
         }
         if (!g.items.length) {
-          doc.font('body').fontSize(10).fillColor(C.muted).text(q.type === 'yesno' ? 'No comments.' : 'No responses.', left, doc.y + 4);
+          doc.font('body').fontSize(10).fillColor(C.muted).text(q.type === 'yesno' || q.type === 'choice' ? 'No comments.' : 'No responses.', left, doc.y + 4);
           doc.y += 22;
           continue;
         }
