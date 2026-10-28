@@ -1,0 +1,51 @@
+<%- include('../partials/top') %>
+<div class="scr">
+  <%- include('../partials/admin-back', { href: '/admin', heading: 'Results', tag: survey.status === 'closed' ? 'Closed' : survey.status === 'draft' ? 'Draft' : 'Live' }) %>
+  <div class="pad body">
+    <div><div class="kick">Admin only</div><h2 style="margin:6px 0 0;font-size:26px"><%= survey.name %></h2></div>
+    <div class="barrow" style="gap:var(--space-2);align-items:stretch">
+      <div class="stat"><div class="n"><%= stats.used %><span style="font-size:16px;color:var(--color-neutral-600)">/<%= stats.issued %></span></div><div class="l">Responded</div></div>
+      <div class="stat"><div class="n"><%= stats.rate %>%</div><div class="l">Response rate</div></div>
+    </div>
+
+    <% questions.forEach(function (q) { %>
+    <a class="qcard" style="gap:8px" href="/admin/surveys/<%= survey.id %>/q/<%= q.position %>">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;width:100%"><div><span class="text-muted" style="font-size:11px">Q<%= q.position %></span><h4 class="qtitle" style="margin-top:2px"><%= q.title %></h4></div><span style="color:var(--color-neutral-600)"><%- icon('chevron-right', 'sm') %></span></div>
+      <% if (q.type === 'yesno') { %>
+        <%- include('../partials/bar', { label: 'Yes', kind: 'yes', count: q.yes, pct: q.yesPct, size: 12 }) %>
+        <%- include('../partials/bar', { label: 'No', kind: 'no', count: q.no, pct: q.noPct, size: 12 }) %>
+        <div class="barrow" style="width:100%;justify-content:space-between;color:var(--color-accent-700);font-size:12px;margin-top:2px"><span>View discussion</span><span class="text-muted"><%= fmt.plural(q.commentCount, 'comment') %></span></div>
+      <% } else if (q.type === 'choice') { %>
+        <%- include('../partials/optbars', { tally: q.tally }) %>
+        <div class="barrow" style="width:100%;justify-content:space-between;color:var(--color-accent-700);font-size:12px;margin-top:2px"><span>View tally</span><span class="text-muted"><%= fmt.plural(q.tally.total, 'answer') %></span></div>
+      <% } else { %>
+        <p class="pre" style="margin:0;font-size:13px;color:var(--color-neutral-800);font-style:italic;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden"><%= q.snippet ? '“' + q.snippet + '”' : 'No responses yet' %></p>
+        <% if (q.fieldCounts) { %><p class="text-muted" style="margin:0;font-size:12px"><%= q.fieldCounts.map(function (f) { return f.label + ' ' + f.count; }).join(' · ') %></p><% } %>
+        <div class="barrow" style="width:100%;justify-content:space-between;color:var(--color-accent-700);font-size:12px;margin-top:2px"><span>Read all responses</span><span class="text-muted"><%= q.commentCount %> written</span></div>
+      <% } %>
+    </a>
+    <% }) %>
+
+    <a class="btn btn-secondary btn-block btn-wide" href="/admin/surveys/<%= survey.id %>/codes">Participant codes &amp; links<%- icon('key') %></a>
+    <a class="btn btn-secondary btn-block btn-wide" style="margin-top:0" href="/admin/surveys/<%= survey.id %>/export.csv">Raw responses (CSV)<%- icon('download') %></a>
+
+    <form method="get" action="/admin/surveys/<%= survey.id %>/report.pdf" style="display:flex;flex-direction:column;gap:var(--space-2)">
+      <label class="check"><input type="checkbox" name="flagged" value="include"> Include flagged comments in the PDF</label>
+      <button type="submit" class="btn btn-primary btn-block btn-wide" style="margin-top:0">Download full report (PDF)<%- icon('download') %></button>
+    </form>
+
+    <hr class="hr" style="margin:var(--space-2) 0 0">
+    <% if (survey.status === 'live') { %>
+    <form method="post" action="/admin/surveys/<%= survey.id %>/status" data-confirm="Close this survey? Participants will see “This survey is now closed.”">
+      <input type="hidden" name="_csrf" value="<%= csrf() %>"><input type="hidden" name="status" value="closed">
+      <button type="submit" class="btn btn-secondary btn-block" style="min-height:44px">Close survey</button>
+    </form>
+    <% } else { %>
+    <form method="post" action="/admin/surveys/<%= survey.id %>/status" data-confirm="Reopen this survey for participants?">
+      <input type="hidden" name="_csrf" value="<%= csrf() %>"><input type="hidden" name="status" value="live">
+      <button type="submit" class="btn btn-secondary btn-block" style="min-height:44px">Reopen survey</button>
+    </form>
+    <% } %>
+  </div>
+</div>
+<%- include('../partials/bottom', { scripts: ['/static/js/admin.js'] }) %>

@@ -1,0 +1,25 @@
+{
+  "name": "dishari-survey",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Dishari Agomoni 2026 feedback survey",
+  "main": "server.js",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "seed": "node scripts/seed.js",
+    "create-admin": "node scripts/create-admin.js",
+    "gen-codes": "node scripts/gen-codes.js",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "better-sqlite3": "^13.0.3",
+    "ejs": "^6.0.1",
+    "express": "^5.2.1",
+    "express-session": "^1.19.0",
+    "pdfkit": "^0.20.2"
+  }
+}

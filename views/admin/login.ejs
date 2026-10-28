@@ -1,0 +1,19 @@
+<%- include('../partials/top') %>
+<div class="scr">
+  <div class="nav"><span class="nav-brand">DISHARI</span><span class="tag tag-accent">Admin</span></div>
+  <form class="pad body" method="post" action="/admin/login" novalidate>
+    <input type="hidden" name="_csrf" value="<%= csrf() %>">
+    <div style="margin-top:var(--space-6)">
+      <div class="kick">Admin access</div>
+      <h2 style="margin-top:8px">Sign in</h2>
+      <p style="font-size:14px;color:var(--color-neutral-700)">For Dishari survey organisers only.</p>
+    </div>
+    <div class="field"><label for="email">Email</label><input class="input" style="min-height:46px" type="email" id="email" name="email" placeholder="you@dishari.org" value="<%= email %>" autocomplete="username" required autofocus></div>
+    <div class="field"><label for="password">Password</label><input class="input" style="min-height:46px" type="password" id="password" name="password" placeholder="••••••••" autocomplete="current-password" required></div>
+    <% if (error) { %>
+    <p class="form-error" role="alert"><%- icon('alert-circle', 'sm') %><%= error %></p>
+    <% } %>
+    <button type="submit" class="btn btn-primary btn-block btn-wide">Sign in<%- icon('arrow-right') %></button>
+  </form>
+</div>
+<%- include('../partials/bottom') %>

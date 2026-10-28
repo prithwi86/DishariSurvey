@@ -1,0 +1,21 @@
+# systemd unit for oauth2-proxy (Google sign-in gate in front of /admin).
+# Install:  sudo cp deploy/oauth2-proxy.service /etc/systemd/system/
+#           sudo systemctl daemon-reload && sudo systemctl enable --now oauth2-proxy
+[Unit]
+Description=oauth2-proxy (Google sign-in for Dishari survey admin)
+After=network.target
+
+[Service]
+Type=simple
+User=oauth2-proxy
+Group=oauth2-proxy
+ExecStart=/usr/local/bin/oauth2-proxy --config=/etc/oauth2-proxy/dishari.cfg
+Restart=on-failure
+RestartSec=3
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+
+[Install]
+WantedBy=multi-user.target

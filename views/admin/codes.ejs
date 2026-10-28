@@ -1,0 +1,30 @@
+<%- include('../partials/top') %>
+<div class="scr">
+  <%- include('../partials/admin-back', { href: '/admin/surveys/' + survey.id, heading: 'Participant codes' }) %>
+  <div class="pad body">
+    <div><div class="kick"><%= survey.name %></div><h2 style="margin:6px 0 0;font-size:24px">One link per participant</h2><p style="font-size:14px;color:var(--color-neutral-700);margin:6px 0 0">Each code works for a single submission. Download the list and use it in your email mail-merge.</p></div>
+    <div class="barrow" style="gap:var(--space-2);align-items:stretch">
+      <div class="stat"><div class="n"><%= stats.issued %></div><div class="l">Issued</div></div>
+      <div class="stat"><div class="n"><%= stats.used %></div><div class="l">Used</div></div>
+      <div class="stat"><div class="n"><%= stats.unused %></div><div class="l">Unused</div></div>
+    </div>
+    <form class="qcard" style="gap:var(--space-3);padding:var(--space-4)" method="post" action="/admin/surveys/<%= survey.id %>/codes">
+      <input type="hidden" name="_csrf" value="<%= csrf() %>">
+      <div class="kick">Generate more codes</div>
+      <div class="field"><label for="count">How many</label><input class="input" style="min-height:46px" type="number" id="count" name="count" min="1" max="5000" step="1" value="<%= count %>" required></div>
+      <button type="submit" class="btn btn-primary btn-block" style="margin-top:0;min-height:46px" id="gen-btn"><%- icon('plus', 'sm') %><span>Generate <span id="gen-n"><%= count %></span> codes</span></button>
+      <% if (generated) { %><p class="form-ok" role="status"><%- icon('check', 'sm') %><%= generated %> new codes generated.</p><% } %>
+      <% if (error) { %><p class="form-error" role="alert"><%- icon('alert-circle', 'sm') %><%= error %></p><% } %>
+    </form>
+    <% if (stats.issued) { %>
+    <div class="qcard" style="gap:0;padding:0 var(--space-4)">
+      <div class="barrow" style="justify-content:space-between;padding:var(--space-3) 0"><span class="kick">Latest codes</span><span class="text-muted" style="font-size:12px">showing <%= latest.length %></span></div>
+      <% latest.forEach(function (c) { %>
+      <div class="barrow" style="justify-content:space-between;padding:10px 0;border-top:1px solid var(--color-divider)"><span class="code"><%= c.code %></span><span class="text-muted" style="font-size:11px"><%= linkPrefix %><%= c.code %></span></div>
+      <% }) %>
+    </div>
+    <a class="btn btn-primary btn-block btn-wide" style="margin-top:0" href="/admin/surveys/<%= survey.id %>/codes.csv">Download codes (CSV)<%- icon('download') %></a>
+    <% } %>
+  </div>
+</div>
+<%- include('../partials/bottom', { scripts: ['/static/js/codes.js'] }) %>

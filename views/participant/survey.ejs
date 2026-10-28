@@ -1,0 +1,110 @@
+<%- include('../partials/top') %>
+<% const total = questions.length; const minutes = Math.max(1, Math.round(total * 0.4)); %>
+
+<!-- ============ INTRO ============ -->
+<div class="scr" id="scr-intro">
+  <%- include('../partials/nav', { navLabel: 'Survey' }) %>
+  <div class="pad body">
+    <div class="banner" style="margin-top:var(--space-2);padding:var(--space-6) var(--space-4)">
+      <div style="font-size:11px;letter-spacing:.06em;text-transform:uppercase;font-weight:700"><%= total %> questions · about <%= minutes %> minute<%= minutes === 1 ? '' : 's' %></div>
+      <h1 style="color:#fff;margin:8px 0 0;font-size:30px"><%= survey.name %></h1>
+    </div>
+    <% if (survey.purpose) { %>
+    <div class="qcard" style="padding:var(--space-4)">
+      <div class="kick">Why we're asking</div>
+      <p class="pre" style="margin:0;font-size:15px;line-height:1.6;color:var(--color-neutral-900);text-wrap:pretty"><%= survey.purpose %></p>
+    </div>
+    <% } %>
+    <p class="text-muted muted-s">Your answers are anonymous to other participants and are reported under a random name. See our <a href="/privacy" target="_blank" rel="noopener" style="color:var(--color-accent-700)">Privacy Policy</a> for the limited exceptions.</p>
+    <noscript><p class="form-error">Please turn on JavaScript in your browser to take this survey.</p></noscript>
+    <div style="flex:1"></div>
+    <button type="button" class="btn btn-primary btn-block btn-wide" style="min-height:52px;font-size:16px" data-action="begin">Begin<%- icon('arrow-right') %></button>
+    <p style="font-size:11px;line-height:1.5;color:var(--color-neutral-700);margin:0">By continuing you agree to Dishari's <a href="/terms" target="_blank" rel="noopener" style="color:var(--color-accent-700)">Terms of Service</a> and <a href="/privacy" target="_blank" rel="noopener" style="color:var(--color-accent-700)">Privacy Policy</a>.</p>
+  </div>
+</div>
+
+<!-- ============ QUESTIONS ============ -->
+<div class="scr" id="scr-questions" hidden>
+  <div class="qtop">
+    <div class="barrow" style="justify-content:space-between;margin-bottom:8px">
+      <button type="button" class="icobtn" data-action="exit"><%- icon('arrow-left', 'sm') %>Exit</button>
+      <span style="font:700 12px var(--font-heading);letter-spacing:.04em"><span id="q-num">1</span> OF <%= total %></span>
+    </div>
+    <div class="bartrack" style="height:6px" role="progressbar" aria-valuemin="1" aria-valuemax="<%= total %>" aria-label="Progress"><div class="barfill yes" id="q-progress" style="width:<%= Math.round(100 / total) %>%"></div></div>
+  </div>
+
+  <% questions.forEach(function (q, i) { const yn = q.type === 'yesno'; %>
+  <section class="pad body" data-q="<%= i %>" data-qid="<%= q.id %>" data-type="<%= q.type %>" hidden>
+    <div style="margin-top:var(--space-2)"><div class="kick"><%= survey.name %></div><h2 style="margin:8px 0 0;font-size:<%= q.title.length > 90 ? 21 : 25 %>px;text-wrap:pretty"><%= q.title %></h2></div>
+    <% if (q.context) { %><p class="pre" style="font-size:14px;color:var(--color-neutral-800);margin:0"><%= q.context %></p><% } %>
+
+    <% if (q.type === 'choice') { %>
+    <div class="choice-list" role="radiogroup" aria-label="Your answer">
+      <% q.options.forEach(function (label, oi) { %>
+      <button type="button" class="btn choice" data-choice="<%= oi %>" role="radio" aria-checked="false"><span class="choice-dot" aria-hidden="true"></span><span><%= label %></span></button>
+      <% }) %>
+    </div>
+    <% } else if (yn) { %>
+    <div class="barrow" style="gap:var(--space-2)" role="group" aria-label="Your answer">
+      <button type="button" class="btn vote vote-yes" data-vote="yes" aria-pressed="false"><%- icon('thumbs-up') %>Yes</button>
+      <button type="button" class="btn vote vote-no" data-vote="no" aria-pressed="false"><%- icon('thumbs-down') %>No</button>
+    </div>
+    <hr class="hr" style="margin:0">
+    <div style="display:flex;flex-direction:column">
+      <div class="field">
+        <label for="composer-<%= q.id %>">Comment (optional)</label>
+        <textarea class="input composer" id="composer-<%= q.id %>" maxlength="2000" style="min-height:72px" placeholder="Anything you'd like to add?"></textarea>
+      </div>
+      <button type="button" class="btn btn-secondary btn-block" style="justify-content:flex-start" data-action="post" disabled><%- icon('send', 'sm') %>Post comment</button>
+      <p class="text-muted" style="font-size:12px;margin:8px 0 0">Only Dishari admins can read this.</p>
+      <div class="posted" style="margin-top:var(--space-3)" hidden></div>
+    </div>
+    <% } else if (q.fields.length) { %>
+    <div style="display:flex;flex-direction:column;gap:var(--space-3)">
+      <% q.fields.forEach(function (label, fi) { %>
+      <div class="field">
+        <label for="field-<%= q.id %>-<%= fi %>"><%= label %></label>
+        <textarea class="input field-box" id="field-<%= q.id %>-<%= fi %>" data-field="<%= fi %>" maxlength="2000" style="min-height:72px" placeholder="Share your thoughts…"></textarea>
+      </div>
+      <% }) %>
+      <p class="text-muted" style="font-size:12px;margin:0">All optional. Only Dishari admins can read this.</p>
+    </div>
+    <% } else { %>
+    <div class="field">
+      <label for="composer-<%= q.id %>">Your answer</label>
+      <textarea class="input composer" id="composer-<%= q.id %>" maxlength="2000" style="min-height:160px" placeholder="Share your thoughts…"></textarea>
+      <p class="text-muted" style="font-size:12px;margin:8px 0 0">Optional. Only Dishari admins can read this.</p>
+    </div>
+    <% } %>
+  </section>
+  <% }) %>
+
+  <div class="footer-bar">
+    <button type="button" class="btn btn-secondary" style="flex:1" data-action="back"><%- icon('chevron-left', 'sm') %>Back</button>
+    <button type="button" class="btn btn-primary" style="flex:2" data-action="next">Next question<%- icon('chevron-right', 'sm') %></button>
+    <button type="button" class="btn btn-primary" style="flex:2" data-action="submit" hidden>Submit survey<%- icon('check', 'sm') %></button>
+  </div>
+  <p class="form-error" id="submit-error" role="alert" style="padding:0 var(--space-4) var(--space-3);background:var(--color-surface)" hidden></p>
+</div>
+
+<!-- ============ THANK YOU ============ -->
+<div class="scr" id="scr-done" hidden>
+  <div class="pad body" style="justify-content:center">
+    <div style="width:68px;height:68px;border-radius:50%;background:var(--gradient-ig);color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-md)"><svg class="i lg" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.7 1-1a5.5 5.5 0 0 0 0-7.7Z" style="fill:#fff;stroke:#fff"/></svg></div>
+    <div><div class="kick">Submitted</div><h1 style="margin:8px 0 0;font-size:34px">Thank you!</h1><p style="font-size:15px;color:var(--color-neutral-800);margin-top:10px">Your feedback on <b><%= survey.name %></b> helps Dishari grow. See you at the next event.</p></div>
+    <div class="stat" style="flex:none"><div class="l" style="margin:0 0 6px">You responded as</div><div class="n" id="display-name" style="font-size:24px;font-family:ui-monospace,Menlo,monospace;color:var(--color-accent-700)"></div></div>
+    <button type="button" class="btn btn-primary btn-block btn-wide" data-action="done">Done<%- icon('arrow-right') %></button>
+    <p class="text-muted muted-s" style="text-align:center">You can close this page now.</p>
+  </div>
+</div>
+
+<!-- Comment row template (filled with textContent only) -->
+<template id="posted-tpl">
+  <div class="cmt">
+    <div class="cmt-h"><span class="avatar">Y</span><b>You</b><span class="text-muted" style="font-size:11px">just now</span><button type="button" class="icobtn" style="margin-left:auto;font-size:12px;color:var(--color-neutral-600)" data-action="remove">Remove</button></div>
+    <p class="cmt-body"></p>
+  </div>
+</template>
+
+<script type="application/json" id="survey-data"><%- surveyJson %></script>
+<%- include('../partials/bottom', { scripts: ['/static/js/survey.js'] }) %>

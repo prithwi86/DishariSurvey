@@ -1,0 +1,37 @@
+# systemd unit for the Dishari survey app.
+# Install:  sudo cp deploy/dishari-survey.service /etc/systemd/system/
+#           sudo systemctl daemon-reload && sudo systemctl enable --now dishari-survey
+[Unit]
+Description=Dishari survey (Node.js)
+After=network.target
+
+[Service]
+Type=simple
+User=dishari
+Group=dishari
+WorkingDirectory=/srv/dishari-survey
+ExecStart=/usr/bin/node server.js
+Restart=on-failure
+RestartSec=3
+Environment=NODE_ENV=production
+Environment=HOST=127.0.0.1
+Environment=PORT=3000
+Environment=BASE_URL=https://www.survey.dishariboston.org
+# Time zone used for timestamps in the admin area and PDF report.
+Environment=TZ=America/New_York
+# Admin sign-in is Google OAuth (oauth2-proxy via nginx), not the app's password form.
+Environment=ADMIN_AUTH=proxy
+# Second check on top of Google sign-in: comma-separated organiser emails allowed into /admin.
+Environment=ADMIN_EMAILS=abhisek.ghosh@dishariboston.org,arunava.banerje@dishariboston.org,biswajit.banerjee@dishariboston.org,gautam.sharma@dishariboston.org,pintu.neogi@dishariboston.org,prithwi.ghosh@dishariboston.org,sanjit.sanyal@dishariboston.org,sayan.ghanti@dishariboston.org,shreyashi.roy@dishariboston.org,souvik.dey@dishariboston.org,sulagna.sanyal@dishariboston.org,sunandaghosh@dishariboston.org
+# Optional: a font that covers Latin + Bengali for the PDF (see README).
+# Environment=PDF_FONT_REGULAR=/srv/dishari-survey/fonts/HindSiliguri-Regular.ttf
+# Environment=PDF_FONT_BOLD=/srv/dishari-survey/fonts/HindSiliguri-Bold.ttf
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=true
+ReadWritePaths=/srv/dishari-survey/data /srv/dishari-survey/backups
+
+[Install]
+WantedBy=multi-user.target

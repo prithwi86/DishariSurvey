@@ -1,0 +1,49 @@
+<%- include('../partials/top') %>
+<% const yn = question.type === 'yesno'; const choice = question.type === 'choice'; %>
+<div class="scr">
+  <%- include('../partials/admin-back', { href: '/admin/surveys/' + survey.id, heading: 'Question ' + question.position, tag: choice ? fmt.plural(tally.total, 'answer') : yn ? fmt.plural(comments.length, 'comment') : fmt.plural(comments.length, 'response') }) %>
+  <div class="pad body">
+    <div><div class="kick"><%= survey.name %></div><h2 style="margin:6px 0 0;font-size:24px;text-wrap:pretty"><%= question.title %></h2></div>
+    <% if (question.context) { %><p class="pre" style="font-size:14px;color:var(--color-neutral-800);margin:0"><%= question.context %></p><% } %>
+
+    <% if (choice) { %>
+    <div class="qcard" style="gap:10px">
+      <div class="kick">Tally · <%= fmt.plural(tally.total, 'answer') %></div>
+      <%- include('../partials/optbars', { tally: tally }) %>
+    </div>
+    <% } else if (yn) { %>
+    <div class="qcard" style="gap:10px">
+      <div class="kick">Tally · <%= fmt.plural(tally.total, 'vote') %></div>
+      <%- include('../partials/bar', { label: 'Yes', kind: 'yes', count: tally.yes, pct: tally.yesPct, size: 13 }) %>
+      <%- include('../partials/bar', { label: 'No', kind: 'no', count: tally.no, pct: tally.noPct, size: 13 }) %>
+    </div>
+    <div class="kick" style="margin-top:var(--space-2)">Full discussion</div>
+    <div>
+      <% if (!comments.length) { %><p class="text-muted muted-s">No comments yet.</p><% } %>
+      <% comments.forEach(function (c) { %>
+      <div class="cmt<%= c.flagged ? ' is-flagged' : '' %>" id="c<%= c.id %>">
+        <div class="cmt-h"><span class="avatar"><%= fmt.initial(c.display_name) %></span><b><%= c.display_name %></b><span class="text-muted" style="font-size:11px" title="<%= fmt.formatDateTime(c.created_at) %>"><%= fmt.relativeTime(c.created_at) %></span>
+          <span style="margin-left:auto;display:inline-flex;align-items:center;gap:6px">
+            <% if (c.flagged) { %><span class="tag tag-outline">Flagged</span><% } %>
+            <%- include('../partials/flag-form', { c: c }) %>
+          </span>
+        </div>
+        <p class="cmt-body"><%= c.body %></p>
+      </div>
+      <% }) %>
+    </div>
+    <% } else { %>
+    <% const groups = question.fields.length
+         ? question.fields.map(function (label, i) { return { label: label, items: comments.filter(function (c) { return c.field_index === i; }) }; })
+         : [{ label: 'Written responses', items: comments }]; %>
+    <% groups.forEach(function (g, gi) { %>
+    <div class="kick"<%- gi ? ' style="margin-top:var(--space-2)"' : '' %>><%= g.label %><%= question.fields.length ? ' · ' + g.items.length : '' %></div>
+    <% if (!g.items.length) { %><p class="text-muted muted-s">No responses yet.</p><% } %>
+    <% g.items.forEach(function (c) { %>
+    <%- include('../partials/answer-card', { c: c }) %>
+    <% }) %>
+    <% }) %>
+    <% } %>
+  </div>
+</div>
+<%- include('../partials/bottom') %>

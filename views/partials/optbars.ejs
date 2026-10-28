@@ -1,0 +1,3 @@
+<% tally.options.forEach(function (o) { %>
+<div class="optrow"><div class="optrow-h"><span><%= o.label %></span><span style="white-space:nowrap"><%= o.count %> · <%= o.pct %>%</span></div><div class="bartrack"><div class="barfill grow yes" style="width:<%= o.pct %>%"></div></div></div>
+<% }) %>

@@ -1,0 +1,28 @@
+<%- include('../partials/top') %>
+<% const statusLabel = { live: 'Live', closed: 'Closed', draft: 'Draft' }; const statusTag = { live: 'tag-accent', closed: 'tag-neutral', draft: 'tag-neutral' }; %>
+<div class="scr">
+  <div class="nav"><span class="nav-brand">DISHARI</span><span class="tag tag-accent">Admin</span>
+    <form method="post" action="/admin/logout" style="margin-left:8px"><input type="hidden" name="_csrf" value="<%= csrf() %>"><button type="submit" class="icobtn" title="Sign out" aria-label="Sign out"><%- icon('rotate-ccw', 'sm') %></button></form>
+  </div>
+  <div class="pad body">
+    <div style="margin-top:var(--space-2)"><div class="kick">Dashboard</div><h2 style="margin-top:6px" id="greeting">Good afternoon.</h2></div>
+    <a class="rolebtn hero" href="/admin/surveys/new">
+      <%- icon('plus', 'lg') %>
+      <h3>Start a new survey</h3>
+      <p>Add Yes/No or written-answer questions, then publish.</p>
+    </a>
+    <div class="kick" style="margin-top:var(--space-2)">Existing surveys</div>
+    <% if (!surveys.length) { %><p class="text-muted muted-s">No surveys yet.</p><% } %>
+    <% surveys.forEach(function (s) { %>
+    <a class="qcard" href="/admin/surveys/<%= s.id %>">
+      <div style="display:flex;justify-content:space-between;align-items:center;width:100%">
+        <span class="tag <%= statusTag[s.status] %>"><%= statusLabel[s.status] %></span>
+        <span class="text-muted" style="font-size:12px"><%= fmt.plural(s.question_count, 'question') %></span>
+      </div>
+      <h4 style="margin:4px 0 0"><%= s.name %></h4>
+      <div class="barrow" style="font-size:12px;color:var(--color-neutral-700)"><%- icon('bar-chart-3', 'sm') %><%= s.used %> of <%= s.issued %> responded · tap for results</div>
+    </a>
+    <% }) %>
+  </div>
+</div>
+<%- include('../partials/bottom', { scripts: ['/static/js/admin.js'] }) %>

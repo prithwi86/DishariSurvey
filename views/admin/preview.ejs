@@ -1,0 +1,29 @@
+<%- include('../partials/top') %>
+<div class="scr">
+  <div class="nav"><span class="nav-brand" style="font-size:15px">Preview</span><span class="tag tag-accent">Published</span></div>
+  <div class="pad body">
+    <div class="banner"><div style="font-size:11px;letter-spacing:.06em;text-transform:uppercase;font-weight:700">Now live</div><h2 style="color:#fff;margin:4px 0 0;font-size:24px"><%= survey.name %></h2><p style="margin:6px 0 0;font-size:13px"><%= questions.length %> questions · exactly what participants will see.</p></div>
+    <% questions.forEach(function (q) { %>
+    <div class="qcard">
+      <span class="text-muted" style="font-size:11px">Question <%= q.position %></span>
+      <h4 style="margin:0;font-size:17px"><%= q.title %></h4>
+      <% if (q.context) { %><p class="text-muted pre" style="font-size:13px;margin:0"><%= q.context %></p><% } %>
+      <% if (q.type === 'choice') { %>
+      <div style="display:flex;flex-direction:column;gap:6px;margin-top:4px"><% q.options.forEach(function (o) { %><span class="btn btn-secondary" style="justify-content:flex-start;gap:10px"><span class="choice-dot" aria-hidden="true"></span><%= o %></span><% }) %></div>
+      <% } else if (q.type === 'yesno') { %>
+      <div class="barrow" style="gap:8px;margin-top:4px"><span class="btn btn-secondary" style="flex:1">Yes</span><span class="btn btn-secondary" style="flex:1">No</span></div>
+      <% } else if (q.fields.length) { %>
+      <% q.fields.forEach(function (f) { %><div class="field" style="margin-top:4px"><label><%= f %></label><div class="input" style="min-height:40px;color:var(--color-neutral-500)">Type your answer…</div></div><% }) %>
+      <% } else { %>
+      <div class="input" style="min-height:56px;color:var(--color-neutral-500);margin-top:4px">Type your answer…</div>
+      <% } %>
+    </div>
+    <% }) %>
+    <div class="barrow" style="gap:8px">
+      <a class="btn btn-secondary" style="flex:1;min-height:44px" href="/admin">Dashboard</a>
+      <a class="btn btn-primary" style="flex:1;min-height:44px" href="/admin/surveys/<%= survey.id %>">View results</a>
+    </div>
+    <a class="btn btn-primary btn-block btn-wide" style="margin-top:0" href="/admin/surveys/<%= survey.id %>/codes">Next: generate participant codes<%- icon('arrow-right') %></a>
+  </div>
+</div>
+<%- include('../partials/bottom') %>

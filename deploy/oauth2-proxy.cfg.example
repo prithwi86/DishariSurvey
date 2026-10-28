@@ -1,0 +1,32 @@
+# oauth2-proxy (https://oauth2-proxy.github.io) — Google sign-in in front of /admin.
+# Save as /etc/oauth2-proxy/dishari.cfg (owned by root, mode 600) and run it as a service:
+#   oauth2-proxy --config=/etc/oauth2-proxy/dishari.cfg
+#
+# In Google Cloud Console → APIs & Services → Credentials, create an "OAuth client ID"
+# (type: Web application) with this authorised redirect URI:
+#   https://www.survey.dishariboston.org/oauth2/callback
+
+provider = "google"
+http_address = "127.0.0.1:4180"
+reverse_proxy = true
+# Only trust X-Forwarded-* headers from the local nginx reverse proxy.
+trusted_proxy_ips = ["127.0.0.1/32", "::1/128"]
+
+client_id = "REPLACE_WITH_GOOGLE_CLIENT_ID.apps.googleusercontent.com"
+client_secret = "REPLACE_WITH_GOOGLE_CLIENT_SECRET"
+# Generate with:  openssl rand -base64 32 | tr -- '+/' '-_'
+cookie_secret = "REPLACE_WITH_RANDOM_32_BYTE_SECRET"
+
+redirect_url = "https://www.survey.dishariboston.org/oauth2/callback"
+cookie_secure = true
+cookie_samesite = "lax"
+cookie_expire = "8h"
+
+# Who may sign in: all organisers use a dishariboston.org Google Workspace account, so trust the domain.
+email_domains = ["dishariboston.org"]
+# (Alternatively, to list individual addresses instead, use this and a one-per-line file:
+#  authenticated_emails_file = "/etc/oauth2-proxy/dishari-admins.txt")
+
+# Pass the signed-in email to nginx (X-Auth-Request-Email), which hands it to the app.
+set_xauthrequest = true
+skip_provider_button = true

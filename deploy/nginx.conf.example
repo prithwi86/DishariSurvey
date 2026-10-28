@@ -1,0 +1,74 @@
+# /etc/nginx/sites-available/www.survey.dishariboston.org
+# Get the certificate first:  sudo certbot --nginx -d www.survey.dishariboston.org
+#
+# /admin is protected by Google sign-in through oauth2-proxy (see deploy/oauth2-proxy.cfg.example),
+# listening on 127.0.0.1:4180. The app runs with ADMIN_AUTH=proxy and trusts the
+# X-Auth-Request-Email header that nginx sets below. Participant pages stay public.
+
+server {
+    listen 80;
+    listen [::]:80;
+    server_name www.survey.dishariboston.org;
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+    server_name www.survey.dishariboston.org;
+
+    ssl_certificate     /etc/letsencrypt/live/www.survey.dishariboston.org/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/www.survey.dishariboston.org/privkey.pem;
+
+    add_header Strict-Transport-Security "max-age=31536000" always;
+    client_max_body_size 1m;
+
+    # Keep participant codes out of the access log (each URL is /<CODE>).
+    access_log off;
+
+    proxy_http_version 1.1;
+    proxy_read_timeout 60s;
+    # Note: each location below repeats its proxy_set_header lines on purpose. In nginx, a
+    # location that sets any proxy_set_header does not inherit the server-level ones.
+
+    # ---- Google sign-in (oauth2-proxy) ----
+    location /oauth2/ {
+        proxy_pass http://127.0.0.1:4180;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Auth-Request-Redirect $request_uri;
+    }
+    location = /oauth2/auth {
+        internal;
+        proxy_pass http://127.0.0.1:4180;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Content-Length "";
+        proxy_pass_request_body off;
+    }
+
+    # ---- Admin: only reachable after Google sign-in ----
+    location /admin {
+        auth_request /oauth2/auth;
+        error_page 401 = /oauth2/sign_in?rd=$scheme://$host$request_uri;
+        auth_request_set $admin_email $upstream_http_x_auth_request_email;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        # Overwrites anything the browser sent under this name.
+        proxy_set_header X-Auth-Request-Email $admin_email;
+        proxy_pass http://127.0.0.1:3000;
+    }
+
+    # ---- Everything else (participant links, /terms, /privacy, static files) ----
+    location / {
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Auth-Request-Email "";
+        proxy_pass http://127.0.0.1:3000;
+    }
+}

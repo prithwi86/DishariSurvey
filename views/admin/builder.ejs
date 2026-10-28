@@ -1,0 +1,49 @@
+<%- include('../partials/top') %>
+<div class="scr">
+  <div class="nav"><a class="btn btn-icon btn-secondary" href="/admin" aria-label="Back to dashboard"><%- icon('arrow-left') %></a><span class="nav-brand" style="font-size:15px">New survey</span><span class="tag tag-neutral" id="draft-count">0 added</span></div>
+  <form class="pad body" method="post" action="/admin/surveys" id="builder">
+    <input type="hidden" name="_csrf" value="<%= csrf() %>">
+    <input type="hidden" name="questions" id="questions-json" value="<%= form ? form.questions : '[]' %>">
+    <% if (error) { %><p class="form-error" role="alert"><%- icon('alert-circle', 'sm') %><%= error %></p><% } %>
+    <div class="field"><label for="s-name">Survey name</label><input class="input" id="s-name" name="name" maxlength="200" placeholder="e.g. Dishari Agomoni 2026 Survey" value="<%= form ? form.name : '' %>" required></div>
+    <div class="field"><label for="s-purpose">Purpose (optional)</label><textarea class="input" id="s-purpose" name="purpose" maxlength="4000" style="min-height:70px" placeholder="Tell participants why you're asking."><%= form ? form.purpose : '' %></textarea></div>
+
+    <div id="drafts-wrap" style="display:flex;flex-direction:column;gap:var(--space-2)" hidden>
+      <div class="kick">Questions added</div>
+      <div id="drafts" style="display:flex;flex-direction:column;gap:var(--space-2)"></div>
+    </div>
+
+    <div class="qcard" style="gap:var(--space-3);padding:var(--space-4)">
+      <div class="kick" id="form-heading">Add a question</div>
+      <div class="field"><label>Answer type</label>
+        <div style="display:flex;gap:8px" role="group" aria-label="Answer type">
+          <button type="button" class="typebtn" data-type="choice" aria-pressed="true">Multiple choice</button>
+          <button type="button" class="typebtn" data-type="yesno" aria-pressed="false">Yes / No</button>
+          <button type="button" class="typebtn" data-type="text" aria-pressed="false">Written</button>
+        </div>
+      </div>
+      <div class="field"><label for="q-title">Question</label><input class="input" id="q-title" maxlength="500" placeholder="Did you enjoy…?"></div>
+      <div class="field" id="options-field"><label for="q-options" id="options-label">Options (one per line)</label><textarea class="input" id="q-options" style="min-height:120px" placeholder="Excellent&#10;Good&#10;Fair&#10;Poor"></textarea></div>
+      <div class="field"><label for="q-context">Context (optional)</label><textarea class="input" id="q-context" maxlength="2000" style="min-height:64px" placeholder="Add background if it helps."></textarea></div>
+      <button type="button" class="btn btn-primary btn-block" style="margin-top:0" id="save-q" disabled><%- icon('plus', 'sm') %><span id="save-label">Add question</span></button>
+    </div>
+
+    <button type="submit" class="btn btn-secondary btn-block btn-wide" id="publish" disabled>Publish survey<%- icon('send') %></button>
+    <p class="text-muted muted-s">Publishing makes the survey live straight away. Questions can't be changed after publishing.</p>
+  </form>
+</div>
+
+<template id="draft-tpl">
+  <div class="qcard">
+    <div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start">
+      <div><div class="barrow" style="gap:6px"><span class="text-muted d-n" style="font-size:11px"></span><span class="tag tag-neutral d-type" style="font-size:10px;padding:1px 8px"></span></div><h4 class="qtitle d-title"></h4></div>
+      <div style="display:flex;gap:4px;flex:none">
+        <button type="button" class="btn btn-icon btn-secondary" data-action="edit" aria-label="Edit question"><%- icon('pencil', 'sm') %></button>
+        <button type="button" class="btn btn-icon btn-secondary" data-action="delete" aria-label="Delete question"><%- icon('trash-2', 'sm') %></button>
+      </div>
+    </div>
+    <p class="text-muted d-options" style="font-size:13px;margin:0"></p>
+    <p class="text-muted d-context pre" style="font-size:13px;margin:0"></p>
+  </div>
+</template>
+<%- include('../partials/bottom', { scripts: ['/static/js/builder.js'] }) %>

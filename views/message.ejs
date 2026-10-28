@@ -1,0 +1,15 @@
+<%- include('partials/top') %>
+<div class="scr">
+  <%- include('partials/nav') %>
+  <div class="pad body">
+    <div style="margin-top:var(--space-6)">
+      <div class="kick"><%= kicker %></div>
+      <h1 style="margin:8px 0 0;font-size:30px;text-wrap:pretty"><%= heading %></h1>
+      <p style="font-size:15px;color:var(--color-neutral-800);margin-top:10px"><%= body %></p>
+    </div>
+    <% if (typeof displayName !== 'undefined' && displayName) { %>
+    <div class="stat" style="flex:none"><div class="l" style="margin:0 0 6px">You responded as</div><div class="n" style="font-size:24px;font-family:ui-monospace,Menlo,monospace;color:var(--color-accent-700)"><%= displayName %></div></div>
+    <% } %>
+  </div>
+</div>
+<%- include('partials/bottom') %>
